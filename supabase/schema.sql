@@ -45,12 +45,8 @@ CREATE TABLE reservations (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   
   -- 시간 제약 조건
-  CONSTRAINT valid_time_range CHECK (end_time > start_time),
-  -- 동일 좌석 시간 중복 방지를 위한 exclusion constraint는 별도 인덱스로 처리
-  CONSTRAINT no_overlap EXCLUDE USING gist (
-    seat_id WITH =,
-    tsrange(start_time, end_time) WITH &&
-  ) WHERE (status = 'active')
+  CONSTRAINT valid_time_range CHECK (end_time > start_time)
+  -- 시간 중복 방지는 애플리케이션 레벨에서 처리
 );
 
 -- 인덱스 생성
