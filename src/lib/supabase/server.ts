@@ -9,8 +9,9 @@ type CookieOption = {
 	secure?:boolean | undefined;
 }
 
+// https://supabase.com/docs/guides/auth/server-side/creating-a-client?queryGroups=environment&environment=server
 export const createSupabaseServerClient = async() => {
-	const cookieStore = await cookies();
+	const cookieStore = await cookies(); // 유저 세션 데이터 읽기 위한 용도
 	const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 	const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

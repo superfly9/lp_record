@@ -1,5 +1,8 @@
+import { SEAT_STATUS_MAPPING } from "@/constant/seat-status";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Seat } from "@/lib/types";
+import Link from "next/link";
+
 
 export default async function Home() {
   const supabase = await createSupabaseServerClient();
@@ -13,12 +16,6 @@ export default async function Home() {
     .from("seats")
     .select("status");
 
-  const statusMapping = {
-    available: "available",
-    occupied: "occupied",
-    reserved: "reserved",
-    out_of_service: "outOfService",
-  } as const;
 
   const seatStats = {
     available: 0,
@@ -28,7 +25,7 @@ export default async function Home() {
   };
 
   seatsData?.forEach((seat: Pick<Seat, "status">) => {
-    const mappedKey = statusMapping[seat.status];
+    const mappedKey = SEAT_STATUS_MAPPING[seat.status];
     if (mappedKey) {
       seatStats[mappedKey] += 1;
     }
@@ -64,6 +61,7 @@ export default async function Home() {
         </div>
 
         <div className="bg-card p-6 rounded-lg border">
+          <Link href="/seats" prefetch="auto">
           <h2 className="text-2xl font-semibold mb-4">좌석 현황</h2>
           <p className="text-muted-foreground mb-4">
             실시간 좌석 현황과 예약 상태를 확인할 수 있습니다.
@@ -76,12 +74,19 @@ export default async function Home() {
               <p className="text-xs text-muted-foreground">이용 가능</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-2xl font-bold text-blue-600">
                 {seatStats.occupied + seatStats.reserved}
               </div>
               <p className="text-xs text-muted-foreground">사용 중</p>
             </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-red-600">
+                {seatStats.outOfService}
+              </div>
+              <p className="text-xs text-muted-foreground">수리 중</p>
+            </div>
           </div>
+          </Link>
         </div>
       </div>
     </div>

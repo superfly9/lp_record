@@ -50,3 +50,8 @@ RDBMS므로 join으로 다른 테이블 참고 가능
   RLS (Row Level Security): 사용자별로 접근 권한을 제어하는 보안 정책
 
   예를 들어, 일반 사용자는 자신의 예약만 보고, 관리자는 모든 예약을 볼 수 있게 설정
+
+
+  
+  ## supabase 설정
+  https://supabase.com/docs/guides/auth/server-side/nextjs
