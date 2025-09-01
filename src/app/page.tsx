@@ -67,24 +67,24 @@ export default async function Home() {
             실시간 좌석 현황과 예약 상태를 확인할 수 있습니다.
           </p>
           <div className="flex gap-4 mb-2">
-            <div className="text-center">
+            {seatStats.available > 0 && <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
                 {seatStats.available}
               </div>
               <p className="text-xs text-muted-foreground">이용 가능</p>
-            </div>
-            <div className="text-center">
+              </div>}
+              {seatStats.occupied + seatStats.reserved > 0 && <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">
                 {seatStats.occupied + seatStats.reserved}
               </div>
               <p className="text-xs text-muted-foreground">사용 중</p>
-            </div>
-            <div className="text-center">
+            </div>}
+            {seatStats.outOfService > 0 && <div className="text-center">
               <div className="text-2xl font-bold text-red-600">
                 {seatStats.outOfService}
               </div>
               <p className="text-xs text-muted-foreground">수리 중</p>
-            </div>
+            </div>}
           </div>
           </Link>
         </div>
