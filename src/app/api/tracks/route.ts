@@ -1,3 +1,6 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createSupabaseServerClient} from '@/lib/supabase/server'
+
 // https://developer.spotify.com/documentation/web-api/tutorials/client-credentials-flow
 interface SpotifyAuthResponse {
   access_token: string;
@@ -129,4 +132,91 @@ function formatDuration(milliseconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+
+export async function POST(request: NextRequest) {
+  try {
+    const { lpId } = await request.json();
+
+    if (!lpId) {
+      return NextResponse.json(
+        { error: 'LP ID가 필요합니다.' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = await createSupabaseServerClient();
+
+    const { data: lp, error: lpError } = await supabase
+      .from('lps')
+      .select('*')
+      .eq('id', lpId)
+      .single();
+
+    if (lpError || !lp) {
+      return NextResponse.json(
+        { error: 'LP를 찾을 수 없습니다.' },
+        { status: 404 }
+      );
+    }
+    // Spotify 액세스 토큰 가져오기
+    const accessToken = await getSpotifyAccessToken();
+    
+    if (!accessToken) {
+      return NextResponse.json({
+        error: 'Spotify API 인증에 실패했습니다.',
+      }, { status: 500 });
+    }
+
+    // Spotify에서 앨범 검색
+    const album = await searchSpotifyAlbum(lp.artist, lp.title, accessToken);
+    
+    if (!album) {
+      return NextResponse.json({
+        error: '트랙 정보를 찾을 수 없습니다.',
+        searched: { artist: lp.artist, album: lp.title }
+      }, { status: 404 });
+    }
+
+    // 트랙 목록 가져오기
+    const tracks = await getSpotifyAlbumTracks(album.id, accessToken);
+    
+    if (!tracks || tracks.length === 0) {
+      return NextResponse.json({
+        error: '트랙 목록을 가져올 수 없습니다.',
+      }, { status: 404 });
+    }
+
+    const tracksToInsert = tracks.map(track => ({
+      ...track,
+      lp_id: lpId,
+    }));
+
+    const { data: insertedTracks, error: insertError } = await supabase
+      .from('tracks')
+      .insert(tracksToInsert)
+      .select();
+
+    if (insertError) {
+      console.error('트랙 저장 오류:', insertError);
+      return NextResponse.json(
+        { error: '트랙 정보 저장에 실패했습니다.' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      tracks: insertedTracks,
+      cached: false,
+    });
+
+  } catch (error) {
+    console.error('트랙 조회 API 오류:', error);
+    return NextResponse.json(
+      { error: '서버 오류가 발생했습니다.' },
+      { status: 500 }
+    );
+  }
 }
