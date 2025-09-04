@@ -16,6 +16,20 @@ export interface LP {
   notes?: string;
   created_at: string;
   updated_at: string;
+  
+  // 조인된 데이터
+  tracks?: Track[];
+}
+
+export interface Track {
+  id: string;
+  lp_id: string;
+  track_number: number;
+  title: string;
+  duration?: string;
+  external_id?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Seat {

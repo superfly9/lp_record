@@ -1,7 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { LP } from "@/lib/types";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { LPCard } from "@/components/lp-card";
 
 async function getLPs(): Promise<LP[]> {
   const supabase = await createSupabaseServerClient();
@@ -41,18 +40,9 @@ export default async function LpsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {lps.map(({ id, title, artist }) => {
-              return (
-                <Card key={id}>
-                  <CardHeader>{title}</CardHeader>
-                  <CardContent>
-                    <Badge>
-                      <p>{artist}</p>
-                    </Badge>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {lps.map((lp) => (
+              <LPCard key={lp.id} lp={lp} />
+            ))}
           </div>
         )}
       </div>
