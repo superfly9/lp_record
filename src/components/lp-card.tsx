@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Image from "next/image";
+import { useTracks } from "@/hooks/useTracks";
 
 interface LPCardProps {
   lp: LP;
@@ -19,6 +20,11 @@ interface LPCardProps {
 export function LPCard({ lp }: LPCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { id, title, artist, cover_url, genre, year, condition, notes } = lp;
+  const {
+    tracks,
+    isLoading: tracksLoading,
+    error: tracksError,
+  } = useTracks(isModalOpen ? id : null);
 
   const handleCardClick = () => {
     setIsModalOpen(true);
@@ -192,14 +198,55 @@ export function LPCard({ lp }: LPCardProps) {
               )}
 
               <div>
-                {/* 스포티파이 API -> supabase 트랙 테이블에 넣을 예정 */}
                 <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   트랙 목록
                 </h4>
-                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md text-center">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    트랙 정보 준비 중...
-                  </p>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-md overflow-hidden">
+                  {tracksLoading ? (
+                    <div className="p-4 text-center">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        트랙 정보를 불러오는 중...
+                      </p>
+                    </div>
+                  ) : tracksError ? (
+                    <div className="p-4 text-center">
+                      <p className="text-sm text-red-500 mb-2">
+                        트랙 정보를 가져올 수 없습니다
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {tracksError}
+                      </p>
+                    </div>
+                  ) : tracks && tracks.length > 0 ? (
+                    <div className="max-h-48 overflow-y-auto">
+                      {tracks.map((track) => (
+                        <div
+                          key={track.id}
+                          className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <span className="text-xs text-gray-400 dark:text-gray-500 w-6 text-center flex-shrink-0">
+                              {track.track_number}
+                            </span>
+                            <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                              {track.title}
+                            </span>
+                          </div>
+                          {track.duration && (
+                            <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+                              {track.duration}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        트랙 정보가 없습니다
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
