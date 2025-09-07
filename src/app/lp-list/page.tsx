@@ -1,9 +1,9 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseReadOnlyClient } from "@/lib/supabase/server";
 import { LP } from "@/lib/types";
 import { LPCard } from "@/components/lp-card";
 
 async function getLPs(): Promise<LP[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseReadOnlyClient();
 
   const { data, error } = await supabase
     .from("lps")

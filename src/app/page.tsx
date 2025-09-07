@@ -1,11 +1,11 @@
 import { SEAT_STATUS_MAPPING } from "@/constant/seat-status";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseReadOnlyClient } from "@/lib/supabase/server";
 import { Seat } from "@/lib/types";
 import { ROUTES } from "@/constant/route";
 import Link from "next/link";
 
 export default async function Home() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseReadOnlyClient();
 
   const { count: lpCount, error: lpError } = await supabase
     .from("lps")

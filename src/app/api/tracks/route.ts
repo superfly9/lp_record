@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseServerClient} from '@/lib/supabase/server'
+import { createSupabaseFullAccessClient } from '@/lib/supabase/server'
 
 // https://developer.spotify.com/documentation/web-api/tutorials/client-credentials-flow
 interface SpotifyAuthResponse {
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createSupabaseFullAccessClient();
 
     const { data: lp, error: lpError } = await supabase
       .from('lps')

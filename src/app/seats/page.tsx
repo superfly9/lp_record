@@ -1,9 +1,9 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseReadOnlyClient } from "@/lib/supabase/server";
 import SeatsClient from "./SeatsClient";
 import { Seat } from "@/lib/types";
 
 export default async function SeatsPage() {
-	const supabase = await createSupabaseServerClient();
+	const supabase = await createSupabaseReadOnlyClient();
 
 	const {data, error} = await supabase.from("seats").select("id,name,status");
 

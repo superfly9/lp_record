@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseReadOnlyClient } from "@/lib/supabase/server";
 import { LP } from "@/lib/types";
 import {
   Card,
@@ -12,7 +12,7 @@ import {
 import { FetchTracksButton } from "@/components/admin/fetch-tracks-button";
 
 export default async function AdminPage() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseReadOnlyClient();
 
   // 인증 확인
   const {
