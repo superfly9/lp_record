@@ -181,34 +181,15 @@ export async function POST(request: NextRequest) {
 
     // 트랙 목록 가져오기
     const tracks = await getSpotifyAlbumTracks(album.id, accessToken);
-    
     if (!tracks || tracks.length === 0) {
       return NextResponse.json({
         error: '트랙 목록을 가져올 수 없습니다.',
       }, { status: 404 });
     }
 
-    const tracksToInsert = tracks.map(track => ({
-      ...track,
-      lp_id: lpId,
-    }));
-
-    const { data: insertedTracks, error: insertError } = await supabase
-      .from('tracks')
-      .insert(tracksToInsert)
-      .select();
-
-    if (insertError) {
-      console.error('트랙 저장 오류:', insertError);
-      return NextResponse.json(
-        { error: '트랙 정보 저장에 실패했습니다.' },
-        { status: 500 }
-      );
-    }
-
     return NextResponse.json({
       success: true,
-      tracks: insertedTracks,
+      tracks,
       cached: false,
     });
 

@@ -7,6 +7,7 @@ import { createServerClient } from "@supabase/ssr";
 // Server Component -> 쿠키 읽기만 가능
 // Server Action/Route Handler -> 읽기 / 쓰기 다 가능
 
+// Server Components용 (읽기 전용)
 export const createSupabaseReadOnlyClient = async() => {
 	const cookieStore = await cookies();
 	const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -29,7 +30,8 @@ export const createSupabaseReadOnlyClient = async() => {
 	});
 };
 
-// Route Handlers와 Server Actions용 - 쿠키 읽기/쓰기 가능
+
+// Route Handlers, Server Actions용 (읽기/쓰기) -> 현재 route.ts에서(route handler) 사용
 export const createSupabaseFullAccessClient = async() => {
 	const cookieStore = await cookies();
 	const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
