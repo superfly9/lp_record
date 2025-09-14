@@ -20,13 +20,7 @@ export function useTracks(lpId: string | null): UseTracksResult {
     setError(null);
 
     try {
-      const response = await fetch('/api/tracks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ lpId }),
-      });
+      const response = await fetch(`/api/tracks?lpId=${encodeURIComponent(lpId)}`);
 
       const data = await response.json();
 

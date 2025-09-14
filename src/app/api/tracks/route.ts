@@ -135,9 +135,9 @@ function formatDuration(milliseconds: number): string {
 }
 
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const { lpId } = await request.json();
+    const lpId = request.nextUrl.searchParams.get('lpId');
 
     if (!lpId) {
       return NextResponse.json(
