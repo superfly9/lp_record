@@ -10,6 +10,7 @@ import {
   CardAction,
 } from "@/components/ui/card";
 import { FetchTracksButton } from "@/components/admin/fetch-tracks-button";
+import { AdminAlbumSearch } from "@/components/admin/album-search";
 
 export default async function AdminPage() {
   const supabase = await createSupabaseReadOnlyClient();
@@ -65,6 +66,9 @@ export default async function AdminPage() {
 
       <section>
         <h2 className="text-2xl font-semibold mb-6">LP 관리</h2>
+
+        {/* Spotify 검색 및 LP 생성 */}
+        <AdminAlbumSearch />
 
         {!lps || lps.length === 0 ? (
           <p className="text-gray-500 text-center py-8">

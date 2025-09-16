@@ -20,13 +20,7 @@ export const FetchTracksButton = ({ lp, onSuccess }: FetchTracksButtonProps) => 
     setSuccess(false);
 
     try {
-      const response = await fetch('/api/tracks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ lpId: lp.id }),
-      });
+      const response = await fetch(`/api/tracks?lpId=${encodeURIComponent(lp.id)}`);
 
       const data = await response.json();
 

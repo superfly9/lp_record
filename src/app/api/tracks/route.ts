@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseFullAccessClient } from '@/lib/supabase/server'
-
-// https://developer.spotify.com/documentation/web-api/tutorials/client-credentials-flow
-interface SpotifyAuthResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
+import getSpotifyAccessToken from "@/app/api/util/token";
+interface SpotifyArtist {
+  items: Array<{
+    id: string;
+    images: Array<{ url: string; height: number; width: number }>;
+  }>;
+  name: string;
+  type: 'artist';
 }
 
-// https://developer.spotify.com/documentation/web-api/reference/get-an-album
 interface SpotifyAlbum {
   id: string;
   name: string;
-  artists: Array<{ name: string }>;
+  artists: Array<SpotifyArtist>;
   images: Array<{ url: string; height: number; width: number }>;
   tracks: {
     items: Array<{
@@ -24,71 +25,6 @@ interface SpotifyAlbum {
   };
 }
 
-// https://developer.spotify.com/documentation/web-api/reference/search
-interface SpotifySearchResponse {
-  albums: {
-    items: SpotifyAlbum[];
-  };
-}
-
-async function getSpotifyAccessToken(): Promise<string | null> {
-  try {
-    const clientId = process.env.SPOTIFY_CLIENT_ID;
-    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-
-    if (!clientId || !clientSecret) {
-      console.error('Spotify API 인증 정보가 없습니다.');
-      return null;
-    }
-
-    const response = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
-      },
-      body: 'grant_type=client_credentials',
-    });
-
-    if (!response.ok) {
-      throw new Error(`Spotify auth error: ${response.status}`);
-    }
-
-    const data: SpotifyAuthResponse = await response.json();
-    return data.access_token;
-  } catch (error) {
-    console.error('Spotify 인증 오류:', error);
-    return null;
-  }
-}
-
-async function searchSpotifyAlbum(artist: string, album: string, accessToken: string): Promise<SpotifyAlbum | null> {
-  try {
-    const query = `artist:"${artist}" album:"${album}"`;
-    const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album&limit=1`;
-    
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Spotify search error: ${response.status}`);
-    }
-
-    const data: SpotifySearchResponse = await response.json();
-    
-    if (data.albums.items && data.albums.items.length > 0) {
-      return data.albums.items[0];
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Spotify 앨범 검색 오류:', error);
-    return null;
-  }
-}
 
 async function getSpotifyAlbumTracks(albumId: string, accessToken: string): Promise<Array<{
   track_number: number;
@@ -97,7 +33,7 @@ async function getSpotifyAlbumTracks(albumId: string, accessToken: string): Prom
   external_id: string;
 }> | null> {
   try {
-    const url = `https://api.spotify.com/v1/albums/${albumId}`;
+    const url = `https://api.spotify.com/v1/albums/${albumId}/tracks`;
     
     const response = await fetch(url, {
       headers: {
@@ -145,21 +81,6 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const supabase = await createSupabaseFullAccessClient();
-
-    const { data: lp, error: lpError } = await supabase
-      .from('lps')
-      .select('*')
-      .eq('id', lpId)
-      .single();
-
-    if (lpError || !lp) {
-      return NextResponse.json(
-        { error: 'LP를 찾을 수 없습니다.' },
-        { status: 404 }
-      );
-    }
     // Spotify 액세스 토큰 가져오기
     const accessToken = await getSpotifyAccessToken();
     
@@ -168,19 +89,9 @@ export async function GET(request: NextRequest) {
         error: 'Spotify API 인증에 실패했습니다.',
       }, { status: 500 });
     }
-
-    // Spotify에서 앨범 검색
-    const album = await searchSpotifyAlbum(lp.artist, lp.title, accessToken);
     
-    if (!album) {
-      return NextResponse.json({
-        error: '트랙 정보를 찾을 수 없습니다.',
-        searched: { artist: lp.artist, album: lp.title }
-      }, { status: 404 });
-    }
-
     // 트랙 목록 가져오기
-    const tracks = await getSpotifyAlbumTracks(album.id, accessToken);
+    const tracks = await getSpotifyAlbumTracks(lpId, accessToken);
     if (!tracks || tracks.length === 0) {
       return NextResponse.json({
         error: '트랙 목록을 가져올 수 없습니다.',
