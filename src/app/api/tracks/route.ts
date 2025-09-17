@@ -66,22 +66,24 @@ export async function GET(request: NextRequest) {
     if (!albumId) {
       albumId = await searchSpotifyAlbum(lp.artist, lp.title, accessToken);
       if (albumId) {
-          try { await supabase.from('lps').update({ spotify_album_id: albumId }).eq('id', lpId); 
-        } catch {
-          console.error('Spotify 앨범 ID 업데이트 실패:', albumId);
+        const { error: updateError } = await supabase
+          .from('lps')
+          .update({ spotify_album_id: albumId })
+          .eq('id', lpId);
+    
+        if (updateError) {
+          return NextResponse.json(
+            { error: `Spotify 앨범 ID 업데이트 실패: ${updateError.message}` },
+            { status: 500 },
+          );
         }
       }
     }
-    
-    if (!albumId) {
-      return NextResponse.json({ error: '트랙 정보를 찾을 수 없습니다.', searched: { artist: lp.artist, album: lp.title } }, { status: 404 });
-    }
-    const tracks = await getSpotifyAlbumTracks(albumId, accessToken);
+
+    const tracks = await getSpotifyAlbumTracks(albumId!, accessToken);
     if (!tracks || tracks.length === 0) {
       return NextResponse.json({ error: '트랙 목록을 가져올 수 없습니다.' }, { status: 404 });
     }
-
-
     return NextResponse.json({ success: true, tracks, cached: false });
   } catch (error) {
     console.error('트랙 조회 API 오류:', error);

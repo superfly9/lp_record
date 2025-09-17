@@ -11,6 +11,22 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createSupabaseFullAccessClient();
+
+
+    const existing = await supabase
+      .from('lps')
+      .select('id')
+      .eq('artist', artist)
+      .eq('title', title)
+      .maybeSingle(); // 없으면 data가 null
+
+    if (existing.data) {
+      return NextResponse.json(
+        { error: '이미 같은 아티스트/제목의 LP가 있습니다.', lpId: existing.data.id },
+        { status: 409 },
+      );
+    }
+
     const { data, error } = await supabase
       .from('lps')
       .insert([{ title, artist, cover_url, genre, year, condition, notes, spotify_album_id }])

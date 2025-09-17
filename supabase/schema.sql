@@ -11,6 +11,7 @@ CREATE TABLE profiles (
 -- LP 테이블
 CREATE TABLE lps (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  spotify_album_id TEXT NOT NULL,
   title TEXT NOT NULL,
   artist TEXT NOT NULL,
   genre TEXT,
