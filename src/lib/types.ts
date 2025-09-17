@@ -12,6 +12,7 @@ export interface LP {
   genre?: string;
   year?: number;
   cover_url?: string;
+  spotify_album_id?: string;
   condition: 'excellent' | 'good' | 'fair' | 'poor';
   notes?: string;
   created_at: string;

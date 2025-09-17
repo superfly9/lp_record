@@ -84,4 +84,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });
   }
 }
-
