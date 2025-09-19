@@ -49,6 +49,9 @@ export interface Reservation {
   start_time: string;
   end_time: string;
   status: 'active' | 'cancelled' | 'completed';
+  guest_name?: string;
+  guest_contact?: string;
+  people_count?: number;
   notes?: string;
   created_at: string;
   updated_at: string;

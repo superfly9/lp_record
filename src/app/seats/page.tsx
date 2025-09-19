@@ -6,7 +6,6 @@ export default async function SeatsPage() {
 	const supabase = await createSupabaseReadOnlyClient();
 
 	const {data, error} = await supabase.from("seats").select("id,name,status");
-
 	if (error) {
 		console.error("좌석 조회 오류:", error);
 	}

@@ -22,7 +22,7 @@ export function TracksList({ tracks, isLoading, error }: Props) {
         <div className="max-h-48 overflow-y-auto">
           {tracks.map((track) => (
             <div
-              key={track.id}
+              key={track.track_number}
               className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
